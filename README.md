@@ -4,11 +4,11 @@
 
 ### Student Information
 
-Name:
+Name: Danica Marie M. Villaver
 
-Section:
+Section: 2063
 
-Date:
+Date: October 01, 2026
 
 ### Required Features
 
