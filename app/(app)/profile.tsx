@@ -35,7 +35,7 @@ export default function ProfileScreen() {
     setError('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/profile`, {
+      const response = await fetch(`${API_BASE_URL}/users/1`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',

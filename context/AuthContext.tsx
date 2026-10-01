@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/profile`, {
+      const response = await fetch(`${API_BASE_URL}/users/1`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${savedToken}`,

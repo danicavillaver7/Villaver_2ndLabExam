@@ -25,7 +25,7 @@ export default function StudentsScreen() {
     setError('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/students`, {
+      const response = await fetch(`${API_BASE_URL}/users`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',

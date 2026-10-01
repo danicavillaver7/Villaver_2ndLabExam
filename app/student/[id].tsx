@@ -32,7 +32,7 @@ export default function StudentDetailsScreen() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/students/${encodeURIComponent(id)}`,
+        `${API_BASE_URL}/users/${encodeURIComponent(id)}`,
         {
           method: 'GET',
           headers: {
