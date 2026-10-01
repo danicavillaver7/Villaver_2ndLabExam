@@ -1,6 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars -- Setters and imports are reserved for exam TODOs. */
-import { createContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useState, type ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+import { router } from 'expo-router';
 
 export type User = {
   id?: string | number;
@@ -20,22 +21,46 @@ type AuthContextValue = {
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+const TOKEN_KEY = 'student_service_access_token';
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  // False keeps the unfinished starter usable; no session has been restored yet.
   const [authLoading, setAuthLoading] = useState(false);
 
   const login = async (accessToken: string, userData: User) => {
-    // TODO EXAM: Save the access token with SecureStore.setItemAsync().
-    // TODO EXAM: Update token state and user state with the supplied arguments.
-    // TODO EXAM: Handle storage failures; never store the password.
+    if (!accessToken) {
+      throw new Error('Authentication token is missing.');
+    }
+
+    try {
+      if (Platform.OS !== 'web') {
+        await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+      }
+
+      setToken(accessToken);
+      setUser(userData);
+    } catch (error) {
+      throw new Error(
+        error instanceof Error
+          ? error.message
+          : 'Unable to save the authentication session.',
+      );
+    }
   };
 
   const logout = async () => {
-    // TODO EXAM: Delete the saved token using SecureStore.deleteItemAsync().
-    // TODO EXAM: Clear token state and user state.
-    // TODO EXAM: Handle storage errors and redirect to /sign-in after logout.
+    try {
+      if (Platform.OS !== 'web') {
+        await SecureStore.deleteItemAsync(TOKEN_KEY);
+      }
+    } catch (error) {
+      console.error('Unable to remove saved authentication token:', error);
+    } finally {
+      setToken(null);
+      setUser(null);
+      router.replace('/sign-in');
+    }
   };
 
   const restoreSession = async () => {
@@ -47,14 +72,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // TODO EXAM: Handle errors and stop authLoading in finally.
   };
 
-  useEffect(() => {
-    // TODO EXAM: Call restoreSession() on startup.
-  }, []);
-
-  // SecureStore is native-only. The web skeleton makes no storage calls.
-  // TODO EXAM: Check platform availability before storage calls; test persistence on Android/iOS.
   return (
-    <AuthContext.Provider value={{ token, user, authLoading, login, logout, restoreSession }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        user,
+        authLoading,
+        login,
+        logout,
+        restoreSession,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
