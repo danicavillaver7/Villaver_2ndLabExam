@@ -1,39 +1,81 @@
+import { StyleSheet, Text, View } from 'react-native';
 import { Link } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function DashboardScreen() {
-  const { token } = useAuth();
-  // TODO EXAM: Replace placeholder user data with authenticated user information.
+  const { user } = useAuth();
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.eyebrow}>STUDENT SERVICE PORTAL</Text>
-      <Text style={styles.title}>Welcome, Student</Text>
-      <Text style={styles.subtitle}>Your student services in one place.</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Student Dashboard</Text>
+
       <View style={styles.card}>
-        <Text style={styles.heading}>Quick Actions</Text>
-        <Link href="/(app)/students" asChild><Pressable accessibilityRole="button" style={styles.button}><Text style={styles.buttonText}>View Students</Text></Pressable></Link>
-        <Link href="/(app)/profile" asChild><Pressable accessibilityRole="button" style={styles.button}><Text style={styles.buttonText}>My Profile</Text></Pressable></Link>
+        <Text style={styles.welcome}>
+          Welcome, {user?.name || 'Student'}
+        </Text>
+
+        <Text style={styles.text}>
+          {user?.email || 'No email available'}
+        </Text>
+
+        <Text style={styles.text}>
+          Role: {user?.role || 'Student'}
+        </Text>
       </View>
+
       <View style={styles.card}>
-        <Text style={styles.heading}>Session Status</Text>
-        <Text style={styles.subtitle}>{token ? 'Authenticated' : 'Not Available'}</Text>
+        <Text style={styles.sectionTitle}>Student Service</Text>
+
+        <Text style={styles.text}>
+          Use the Students tab to view student records and open individual
+          student details.
+        </Text>
+
+        <Link href="/(app)/students" style={styles.link}>
+          View Students
+        </Link>
       </View>
-      <Link href="/sign-in" style={styles.link}>Open Sign In</Link>
-      <Text style={styles.note}>Exam starter: screens are accessible while route protection is incomplete.</Text>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, padding: 24, gap: 16, backgroundColor: '#f2f5fa' },
-  eyebrow: { color: '#245bb2', fontSize: 12, fontWeight: '700', letterSpacing: 1 },
-  title: { color: '#17324d', fontSize: 28, fontWeight: '700' },
-  subtitle: { color: '#536579', fontSize: 16 },
-  card: { backgroundColor: '#ffffff', borderRadius: 12, padding: 20, gap: 14 },
-  heading: { color: '#17324d', fontSize: 18, fontWeight: '600' },
-  button: { backgroundColor: '#245bb2', padding: 16, borderRadius: 8 },
-  buttonText: { color: '#ffffff', fontWeight: '600' },
-  link: { color: '#245bb2', paddingVertical: 10 },
-  note: { color: '#536579', fontSize: 12 },
+  container: {
+    flex: 1,
+    padding: 24,
+    backgroundColor: '#f2f5fa',
+    gap: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#17324d',
+  },
+  card: {
+    backgroundColor: '#ffffff',
+    padding: 20,
+    borderRadius: 12,
+    gap: 12,
+  },
+  welcome: {
+    fontSize: 21,
+    fontWeight: '600',
+    color: '#17324d',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#17324d',
+  },
+  text: {
+    fontSize: 15,
+    color: '#536579',
+    lineHeight: 22,
+  },
+  link: {
+    color: '#245bb2',
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 4,
+  },
 });
