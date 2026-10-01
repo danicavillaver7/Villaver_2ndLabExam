@@ -1,7 +1,8 @@
-import { createContext, useState, type ReactNode } from 'react';
+import { createContext, useEffect, useState, type ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import { router } from 'expo-router';
+import { API_BASE_URL } from '@/constants/api';
 
 export type User = {
   id?: string | number;
@@ -26,7 +27,7 @@ const TOKEN_KEY = 'student_service_access_token';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [authLoading, setAuthLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
 
   const login = async (accessToken: string, userData: User) => {
     if (!accessToken) {
@@ -64,13 +65,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const restoreSession = async () => {
-    // TODO EXAM: Set authLoading while restoring the session.
-    // TODO EXAM: Read the saved token with SecureStore.getItemAsync().
-    // TODO EXAM: Validate the token via GET /profile with a Bearer token.
-    // TODO EXAM: Update token and user state for a valid session.
-    // TODO EXAM: Handle 401 Unauthorized / expired sessions and clear invalid credentials.
-    // TODO EXAM: Handle errors and stop authLoading in finally.
+    setAuthLoading(true);
+
+    try {
+      if (Platform.OS === 'web') {
+        setToken(null);
+        setUser(null);
+        return;
+      }
+
+      const savedToken = await SecureStore.getItemAsync(TOKEN_KEY);
+
+      if (!savedToken) {
+        setToken(null);
+        setUser(null);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/profile`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${savedToken}`,
+          Accept: 'application/json',
+        },
+      });
+
+      if (response.status === 401) {
+        await SecureStore.deleteItemAsync(TOKEN_KEY);
+        setToken(null);
+        setUser(null);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Session validation failed with status ${response.status}.`);
+      }
+
+      const data = await response.json();
+
+      const profile = data?.user ?? data;
+
+      setToken(savedToken);
+      setUser(profile);
+    } catch (error) {
+      console.error('Unable to restore authentication session:', error);
+      setToken(null);
+      setUser(null);
+    } finally {
+      setAuthLoading(false);
+    }
   };
+
+  useEffect(() => {
+    restoreSession();
+  }, []);
 
   return (
     <AuthContext.Provider
