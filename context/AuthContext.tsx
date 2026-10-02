@@ -2,7 +2,7 @@ import { createContext, useEffect, useState, type ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import { router } from 'expo-router';
-import { API_BASE_URL } from '@/constants/api';
+import { AUTH_API_BASE_URL } from '@/constants/api';
 
 export type User = {
   id?: string | number;
@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/users/1`, {
+      const response = await fetch(`${AUTH_API_BASE_URL}/profile`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${savedToken}`,

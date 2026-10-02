@@ -1,14 +1,24 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
-import { API_BASE_URL } from '@/constants/api';
+import { AUTH_API_BASE_URL } from '@/constants/api';
 
 export default function SignInScreen() {
   const { login } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -27,7 +37,7 @@ export default function SignInScreen() {
     setError('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/login`, {
+      const response = await fetch(`${AUTH_API_BASE_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,13 +86,21 @@ export default function SignInScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+    >
       <View style={styles.card}>
         <Text style={styles.eyebrow}>CCE106 • PRACTICAL EXAMINATION</Text>
+
         <Text style={styles.title}>Student Service Portal</Text>
-        <Text style={styles.subtitle}>Sign in to access student services.</Text>
+
+        <Text style={styles.subtitle}>
+          Sign in to access student services.
+        </Text>
 
         <Text style={styles.label}>Email</Text>
+
         <TextInput
           style={styles.input}
           accessibilityLabel="Email"
@@ -95,17 +113,41 @@ export default function SignInScreen() {
         />
 
         <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          accessibilityLabel="Password"
-          placeholder="Enter your password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            accessibilityLabel="Password"
+            placeholder="Enter your password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+          />
+
+          <Pressable
+            style={styles.eyeButton}
+            onPress={() => setShowPassword(!showPassword)}
+            accessibilityRole="button"
+            accessibilityLabel={
+              showPassword ? 'Hide password' : 'Show password'
+            }
+          >
+            <Ionicons
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              size={22}
+              color="#536579"
+            />
+          </Pressable>
+        </View>
 
         <View style={styles.feedback} accessibilityLiveRegion="polite">
-          {loading && <ActivityIndicator color="#245bb2" accessibilityLabel="Signing in" />}
+          {loading && (
+            <ActivityIndicator
+              color="#245bb2"
+              accessibilityLabel="Signing in"
+            />
+          )}
+
           {error ? <Text style={styles.error}>{error}</Text> : null}
         </View>
 
@@ -121,8 +163,15 @@ export default function SignInScreen() {
         </Pressable>
 
         <Text style={styles.note}>
-          Sign in using your instructor-provided account.
+          Sign in using your registered account.
         </Text>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push('/sign-up')}
+        >
+          <Text style={styles.signUpLink}>Create an account</Text>
+        </Pressable>
       </View>
     </ScrollView>
   );
@@ -173,6 +222,28 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: '#17324d',
   },
+  passwordContainer: {
+    height: 52,
+    borderWidth: 1,
+    borderColor: '#c6d2e1',
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  passwordInput: {
+    flex: 1,
+    height: '100%',
+    paddingHorizontal: 14,
+    fontSize: 16,
+    color: '#17324d',
+  },
+  eyeButton: {
+    height: '100%',
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   feedback: {
     minHeight: 28,
   },
@@ -193,5 +264,11 @@ const styles = StyleSheet.create({
     color: '#536579',
     fontSize: 12,
     marginTop: 20,
+  },
+  signUpLink: {
+    color: '#245bb2',
+    fontWeight: '700',
+    textAlign: 'center',
+    marginTop: 16,
   },
 });
